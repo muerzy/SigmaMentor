@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作业 03 · 循环求和 — SigmaMentor 学生端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  /* ---- 本页布局 ---- */
+  .work{display:grid;grid-template-columns:300px minmax(0,1fr) 330px;gap:16px;align-items:start}
+  .stack{display:flex;flex-direction:column;gap:16px}
+
+  .prob-desc{font-size:13.5px;line-height:1.8}
+  .io-blk{background:var(--ink-tint);color:#e8e6e0;font-family:var(--mono);font-size:11.5px;line-height:1.7;padding:10px 12px;border-radius:var(--r);display:grid;grid-template-columns:1fr 1fr;gap:2px 12px}
+  .io-blk .io-k{color:rgba(232,230,224,.5)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .limit{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--fg-muted);border-top:1px dashed var(--line);padding-top:10px;margin-top:12px;line-height:1.9}
+
+  .cta-row{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .cta-note{font-size:12px;color:var(--fg-muted);flex:1;min-width:180px}
+
+  .judge-line{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--fg-muted);padding:4px 0}
+  .judge-line .dotp{width:7px;height:7px;border-radius:50%;background:var(--ink);animation:tp 1s infinite ease-in-out}
+  .judge-bar{height:2px;background:rgba(10,10,11,.1);margin:8px 0 12px;overflow:hidden}
+  .judge-bar i{display:block;height:100%;background:var(--ink);width:0;transition:width .3s ease}
+
+  .verdict{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .verdict .score{font-family:var(--serif-en);font-weight:800;font-size:30px;letter-spacing:-.02em;font-feature-settings:"tnum"}
+  .verdict .score .u{font-family:var(--serif-zh);font-weight:500;font-size:.5em;margin-left:.1em;opacity:.7}
+
+  .cases{width:100%;border-collapse:collapse;margin-top:14px}
+  .cases th{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-faint);text-align:left;padding:7px 8px;border-bottom:1.5px solid var(--line-strong)}
+  .cases td{font-family:var(--mono);font-size:12px;padding:8px;border-bottom:1px solid var(--line)}
+  .cases td.ok{color:var(--pass);font-weight:600}
+  .cases td.bad{color:var(--fail);font-weight:600}
+  .cases td.num{font-feature-settings:"tnum"}
+
+  .diag-strip{display:flex;gap:12px;align-items:flex-start;border-top:1px dashed var(--line);margin-top:14px;padding-top:12px}
+  .diag-strip .d-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--fg-faint);white-space:nowrap;padding-top:3px}
+  .diag-strip .d-v{font-size:12.5px;line-height:1.7;color:var(--fg-muted);flex:1}
+
+  .hist{display:flex;flex-direction:column}
+  .hist-item{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;width:100%;text-align:left;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+  .hist-item:last-child{border-bottom:0}
+  .hist-item:hover .h-t{color:var(--ink)}
+  .hist-item .h-no{font-family:var(--serif-en);font-style:italic;font-size:14px;color:var(--fg-faint)}
+  .hist-item .h-t{font-family:var(--mono);font-size:11px;color:var(--fg-muted);line-height:1.6;transition:color .15s}
+  .hist-item .h-t b{display:block;font-family:var(--sans-zh);font-weight:500;font-size:12.5px;color:var(--ink)}
+
+  .events{display:flex;flex-direction:column;max-height:420px;overflow-y:auto}
+  .evt{display:grid;grid-template-columns:26px 74px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+  .evt:last-child{border-bottom:0}
+  .evt .e-seq{font-family:var(--serif-en);font-style:italic;font-size:12.5px;color:var(--fg-faint);text-align:right}
+  .evt .e-d{color:var(--fg-muted);font-size:11.5px;line-height:1.5}
+  .evt .e-iv{font-family:var(--mono);font-size:10px;color:var(--fg-faint);white-space:nowrap}
+  .evt.new{animation:evtIn .5s ease}
+  @keyframes evtIn{from{background:rgba(10,10,11,.06)}to{background:transparent}}
+
+  /* 桌面优先（顶栏导航·内容全宽）：≥980 三栏工作台；640–979 双栏；<640 单列 */
+  @media (max-width:979px){.work{grid-template-columns:280px minmax(0,1fr)}.work .col-r{grid-column:1 / -1}}
+  @media (max-width:639px){.work{grid-template-columns:1fr}}
+
+  /* 墨黑主题：本页字面量颜色补丁 */
+  .theme-dark .judge-bar{background:rgba(241,239,234,.12)}
+  .theme-dark .io-blk{border:1px solid rgba(241,239,234,.14)}
+  .theme-dark .cases td.ok{color:oklch(0.74 0.12 155)}
+  .theme-dark .cases td.bad{color:oklch(0.70 0.15 25)}
+</style>
+</head>
+<body class="theme-dark">
+<div class="app">
+  <div id="nav-mount"></div>
+
+  <main class="main">
+    <div class="page-head" data-od-id="page-head">
+      <div>
+        <div class="kicker">F1 · 作业提交与沙箱判题 / Submit &amp; Judge</div>
+        <h1 class="h-page">作业 03 · 循环求和</h1>
+        <div class="page-meta">
+          <span>截止 8.17 23:59</span><span>满分 100</span>
+          <span>已提交 <b id="submit-count">7</b> 次</span>
+          <span>状态 <span id="head-status"><span class="badge b-warn">部分通过</span></span></span>
+        </div>
+      </div>
+      <div class="head-actions">
+        <a class="btn btn-ghost btn-sm" href="diagnosis.html" data-od-id="goto-diagnosis">诊断画像</a>
+        <a class="btn btn-ghost btn-sm" href="tutor.html" data-od-id="goto-tutor">问导师</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="work">
+
+        <!-- 左：题目 -->
+        <div class="stack col-l">
+          <section class="card" data-od-id="problem-card">
+            <div class="card-h"><span class="card-t">题面</span><span class="card-k">P-03</span></div>
+            <div class="card-b">
+              <p class="prob-desc">读入整数 <code class="inline">n</code>（0 ≤ n ≤ 100），输出 <b>1 到 n−1</b>（含两端）的所有整数之和。</p>
+              <div style="height:14px"></div>
+              <div class="kicker" style="margin-bottom:8px">示例 · Samples</div>
+              <div class="io-blk">
+                <span class="io-k">输入</span><span class="io-k">输出</span>
+                <span>5</span><span>10</span>
+                <span class="io-k">输入</span><span class="io-k">输出</span>
+                <span>1</span><span>0</span>
+              </div>
+              <div style="height:14px"></div>
+              <div class="kicker" style="margin-bottom:8px">知识点</div>
+              <div class="chips"><span class="chip on">循环边界</span><span class="chip">累加器</span></div>
+              <div class="limit">LIMIT · 1000ms / 64MB<br>容器沙箱隔离执行 · 网络禁用</div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-b" style="font-size:12.5px;color:var(--fg-muted);line-height:1.75">
+              <b style="color:var(--ink)">原型说明</b> — 本页判题为浏览器内规则版模拟（识别边界写法差异并逐用例比对），真实环境为容器隔离沙箱（PRD · I2）。
+            </div>
+          </section>
+        </div>
+
+        <!-- 中：编辑器 + 判题 -->
+        <div class="stack col-m">
+          <section class="card" data-od-id="editor-card">
+            <div class="card-h">
+              <span class="card-t">main.c</span><span class="card-k">C · 在线编辑</span>
+            </div>
+            <div class="card-b">
+              <div class="editor" data-od-id="code-editor">
+                <div class="ed-gutter" id="gutter" aria-hidden="true"></div>
+                <textarea class="ed-area" id="code" spellcheck="false" aria-label="代码编辑区"></textarea>
+              </div>
+              <div class="cta-row">
+                <button class="btn btn-primary" id="submit-btn" data-od-id="submit-button">提交到沙箱</button>
+                <button class="btn btn-ghost" id="reset-btn">重置代码</button>
+                <span class="cta-note">全过程事件（编辑 / 编译 / 运行 / 通过 / 放弃）正在写入 <code class="inline">submission_events</code></span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card" data-od-id="judge-card">
+            <div class="card-h">
+              <span class="card-t">判题结果</span>
+              <span class="card-k" id="judge-no">Submission #7 · 14:44</span>
+            </div>
+            <div class="card-b" id="judge-body"><!-- JS 渲染 --></div>
+          </section>
+        </div>
+
+        <!-- 右：历史 + 事件流 -->
+        <div class="stack col-r">
+          <section class="card" data-od-id="history-card">
+            <div class="card-h"><span class="card-t">提交历史</span><span class="card-k">7</span></div>
+            <div class="card-b" style="padding-top:6px;padding-bottom:8px">
+              <div class="hist" id="hist"></div>
+            </div>
+          </section>
+
+          <section class="card" data-od-id="events-card">
+            <div class="card-h">
+              <span class="card-t">过程事件</span>
+              <span class="card-k">submission_events</span>
+            </div>
+            <div class="card-b" style="padding-top:4px;padding-bottom:8px">
+              <div class="note" style="padding:6px 0 10px;border-bottom:1px dashed var(--line);margin-bottom:4px">
+                只追加 · 不可篡改 · 异步写入（不阻塞提交）
+              </div>
+              <div class="events" id="events"></div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+SM.shell("student", "assignment");
+(function () {
+  "use strict";
+
+  /* ============ 常量与状态 ============ */
+  var STARTER =
+    '#include <stdio.h>\n' +
+    '\n' +
+    'int main() {\n' +
+    '    int n, sum = 0;\n' +
+    '    scanf("%d", &n);\n' +
+    '    for (int i = 1; i <= n; i++) {\n' +
+    '        sum += i;\n' +
+    '    }\n' +
+    '    printf("%d\\n", sum);\n' +
+    '    return 0;\n' +
+    '}\n';
+
+  var CASES = [
+    { n: 0, exp: 0 }, { n: 1, exp: 0 }, { n: 5, exp: 10 },
+    { n: 10, exp: 45 }, { n: 100, exp: 4950 },
+  ];
+
+  /* 历史提交（#1–#7，与诊断页 / 高危名单数据一致） */
+  var HIST = [
+    { no: 1, t: "8.12 20:41", type: "compile", d: "缺少分号" },
+    { no: 2, t: "8.12 21:07", type: "compile", d: "缺少分号" },
+    { no: 3, t: "8.12 21:44", type: "run", d: "0/5 用例未通过" },
+    { no: 4, t: "8.12 23:40", type: "drop", d: "超时无活动 22 分钟" },
+    { no: 5, t: "8.15 14:02", type: "compile", d: "变量未声明" },
+    { no: 6, t: "8.15 14:20", type: "run", d: "输出与期望不符" },
+    { no: 7, t: "8.15 14:44", type: "partial", d: "1/5 · 20 分" },
+  ];
+
+  /* 种子事件（seq 1–11） */
+  var events = [
+    { seq: 1, type: "edit", d: "开始编辑题目 P-03", iv: "—" },
+    { seq: 2, type: "compile", d: "提交 #1 · main.c:6: 缺少分号", iv: "6分12秒" },
+    { seq: 3, type: "edit", d: "编辑代码（+2 行）", iv: "26秒" },
+    { seq: 4, type: "compile", d: "提交 #2 · main.c:6: 缺少分号", iv: "1分03秒" },
+    { seq: 5, type: "edit", d: "重写循环段", iv: "37秒" },
+    { seq: 6, type: "run", d: "提交 #3 · 0/5 用例未通过", iv: "1.9分" },
+    { seq: 7, type: "drop", d: "超时无活动 22 分钟 · 放弃", iv: "1小时56分" },
+    { seq: 8, type: "edit", d: "重新打开题目 · 修改 scanf 段", iv: "2天14小时" },
+    { seq: 9, type: "compile", d: "提交 #5 · 变量未声明", iv: "2分06秒" },
+    { seq: 10, type: "run", d: "提交 #6 · 输出与期望不符", iv: "18秒" },
+    { seq: 11, type: "partial", d: "提交 #7 · 1/5 用例通过", iv: "24分" },
+  ];
+  var seq = 11;
+  var lastTs = Date.now();
+  var submitCount = 7;
+  var dropFired = false;
+
+  var $code = document.getElementById("code");
+  var $gutter = document.getElementById("gutter");
+  var $submit = document.getElementById("submit-btn");
+
+  /* ============ 编辑器 ============ */
+  $code.value = STARTER;
+  function renderGutter() {
+    var n = $code.value.split("\n").length;
+    var out = [];
+    for (var i = 1; i <= n; i++) out.push(i);
+    $gutter.innerHTML = out.join("<br>");
+  }
+  renderGutter();
+  $code.addEventListener("scroll", function () {
+    $gutter.scrollTop = $code.scrollTop;
+  });
+
+  var editTimer = null;
+  $code.addEventListener("input", function () {
+    renderGutter();
+    activity();
+    clearTimeout(editTimer);
+    editTimer = setTimeout(function () {
+      pushEvent("edit", "编辑代码");
+    }, 900);
+  });
+
+  document.getElementById("reset-btn").addEventListener("click", function () {
+    $code.value = STARTER;
+    renderGutter();
+    pushEvent("edit", "重置为上次提交版本");
+  });
+
+  /* ============ 事件流 ============ */
+  function pushEvent(type, d) {
+    var now = Date.now();
+    seq += 1;
+    events.push({ seq: seq, type: type, d: d, iv: SM.fmtInterval(now - lastTs) });
+    lastTs = now;
+    renderEvents(true);
+    return seq;
+  }
+  function renderEvents(animLast) {
+    var host = document.getElementById("events");
+    host.innerHTML = events.slice().reverse().map(function (e, i) {
+      return (
+        '<div class="evt' + (animLast && i === 0 ? " new" : "") + '">' +
+        '<span class="e-seq">' + e.seq + "</span>" +
+        SM.evtBadge(e.type) +
+        '<span class="e-d">' + e.d + "</span>" +
+        '<span class="e-iv" title="与上一事件间隔">+' + e.iv + "</span>" +
+        "</div>"
+      );
+    }).join("");
+  }
+  renderEvents();
+
+  /* ============ 提交历史（原生 button：键盘可达，点击/回车打开证据抽屉） ============ */
+  function renderHist() {
+    document.getElementById("hist").innerHTML = HIST.slice().reverse().map(function (h) {
+      return (
+        '<button class="hist-item" type="button" data-no="' + h.no + '">' +
+        '<span class="h-no">#' + h.no + "</span>" +
+        '<span class="h-t"><b>' + h.d + "</b>" + h.t + "</span>" +
+        SM.evtBadge(h.type) +
+        "</button>"
+      );
+    }).join("");
+    document.querySelectorAll(".hist-item").forEach(function (el) {
+      el.addEventListener("click", function () {
+        var no = +el.getAttribute("data-no");
+        var h = HIST.filter(function (x) { return x.no === no; })[0] || HIST[HIST.length - 1];
+        SM.drawer(
+          "提交 #" + h.no + " · " + h.t,
+          '<div style="margin-bottom:10px">' + SM.evtBadge(h.type) +
+          '<span class="note" style="margin-left:8px;font-size:13px">' + h.d + "</span></div>" +
+          '<div class="note" style="font-size:13px">该次提交的过程事件已写入 <code class="inline">submission_events</code>；#3 / #6 / #7 的代码快照与前后事件见诊断画像。</div>' +
+          '<div class="note note-b"><a class="link" href="diagnosis.html">在诊断画像中查看证据链 →</a></div>'
+        );
+      });
+    });
+  }
+  renderHist();
+
+  /* ============ 判题 ============ */
+  function verdictHTML(v) {
+    /* v: {kind:'pass'|'partial'|'run'|'compile', pass, total, score, rows|msg} */
+    var badge =
+      v.kind === "pass" ? '<span class="badge b-pass">通过</span>' :
+      v.kind === "partial" ? '<span class="badge b-warn">部分通过</span>' :
+      v.kind === "run" ? '<span class="badge b-fail">运行错误</span>' :
+      '<span class="badge b-fail">编译错误</span>';
+    var head =
+      '<div class="verdict">' + badge +
+      '<span class="score">' + v.score + '<span class="u">分</span></span>' +
+      '<span class="note">' + v.pass + " / " + v.total + ' 用例通过</span>' +
+      '<span class="spacer"></span><span class="card-k">延迟 0.4s</span></div>';
+
+    var body = "";
+    if (v.kind === "compile") {
+      body = '<div class="codebox" style="margin-top:12px">main.c:6:23: <span class="cmt">error:</span> expected \';\' before \'return\'</div>';
+    } else if (v.rows) {
+      body =
+        '<div class="scroll-x"><table class="cases"><thead><tr><th>用例</th><th>输入 n</th><th>期望</th><th>实得</th><th>判定</th></tr></thead><tbody>' +
+        v.rows.map(function (r) {
+          return (
+            "<tr><td>#" + r.i + '</td><td class="num">' + r.n + '</td><td class="num">' + r.exp +
+            '</td><td class="num">' + r.got + '</td><td class="' + (r.ok ? "ok" : "bad") + '">' +
+            (r.ok ? "✓ AC" : "✗ WA") + "</td></tr>"
+          );
+        }).join("") + "</tbody></table></div>";
+    } else if (v.msg) {
+      body = '<div class="note" style="margin-top:10px">' + v.msg + "</div>";
+    }
+
+    /* 诊断摘要（S1：失败时告知错在哪个知识点 + 同类关联） */
+    var diag = "";
+    if (v.kind !== "pass") {
+      diag =
+        '<div class="diag-strip">' +
+        '<span class="d-k">诊断摘要</span>' +
+        '<span class="d-v">错误定位：<b>循环边界</b> —— n ≥ 1 的用例全部多加了一个 n，与 8.12 #3 同型。' +
+        ' <a class="link" href="diagnosis.html">查看诊断画像 →</a></span>' +
+        "</div>";
+    } else {
+      diag =
+        '<div class="diag-strip">' +
+        '<span class="d-k">下一步</span>' +
+        '<span class="d-v">L4 复盘已就绪——去导师对话，用自己的话总结这次错在哪类问题上，结论将回流诊断画像。' +
+        ' <a class="link" href="tutor.html">进入复盘 →</a></span>' +
+        "</div>";
+    }
+    return head + body + diag;
+  }
+
+  function judge(code) {
+    if (!/for\s*\(/.test(code) || !/printf/.test(code)) {
+      return {
+        kind: "compile", pass: 0, total: 5, score: 0,
+      };
+    }
+    if (/i\s*<=\s*n/.test(code)) {
+      var rows = CASES.map(function (c, i) {
+        var got = c.n === 0 ? 0 : (c.n * (c.n + 1)) / 2;
+        return { i: i + 1, n: c.n, exp: c.exp, got: got, ok: got === c.exp };
+      });
+      return { kind: "partial", pass: 1, total: 5, score: 20, rows: rows };
+    }
+    if (/i\s*<\s*n/.test(code)) {
+      return {
+        kind: "pass", pass: 5, total: 5, score: 100,
+        rows: CASES.map(function (c, i) {
+          return { i: i + 1, n: c.n, exp: c.exp, got: c.exp, ok: true };
+        }),
+      };
+    }
+    return {
+      kind: "run", pass: 0, total: 5, score: 0,
+      msg: "程序可运行，但 5 组用例输出均与期望不符——检查循环从哪里开始、到哪里停止。",
+    };
+  }
+
+  var judging = false;
+  $submit.addEventListener("click", function () {
+    if (judging) return;
+    judging = true;
+    activity();
+    $submit.disabled = true;
+    $submit.textContent = "判题中…";
+
+    var body = document.getElementById("judge-body");
+    var jc = document.querySelector('[data-od-id="judge-card"]');
+    jc.setAttribute("aria-busy", "true");
+    var steps = ["编译 main.c …", "启动沙箱容器 …", "运行用例 1/5 …", "运行用例 2/5 …", "运行用例 3/5 …", "运行用例 4/5 …", "运行用例 5/5 …", "比对输出 …"];
+    var si = 0;
+    body.innerHTML =
+      '<div class="judge-line"><span class="dotp"></span><span id="jstep">' + steps[0] + "</span></div>" +
+      '<div class="judge-bar"><i id="jbar"></i></div>';
+
+    var timer = setInterval(function () {
+      si += 1;
+      var bar = document.getElementById("jbar");
+      var step = document.getElementById("jstep");
+      if (bar) bar.style.width = Math.min(100, (si / steps.length) * 100) + "%";
+      if (si < steps.length) {
+        if (step) step.textContent = steps[si];
+        return;
+      }
+      clearInterval(timer);
+      finish();
+    }, 260);
+
+    function finish() {
+      var v = judge($code.value);
+      submitCount += 1;
+      var no = submitCount;
+      var now = new Date();
+      var hh = ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2);
+
+      /* 更新页面各处 */
+      document.getElementById("submit-count").textContent = submitCount;
+      document.getElementById("judge-no").textContent = "Submission #" + no + " · " + hh;
+      document.getElementById("head-status").innerHTML =
+        v.kind === "pass" ? '<span class="badge b-pass">通过</span>' :
+        v.kind === "partial" ? '<span class="badge b-warn">部分通过</span>' :
+        '<span class="badge b-fail">' + (v.kind === "compile" ? "编译错误" : "运行错误") + "</span>";
+      document.querySelector('[data-od-id="history-card"] .card-k').textContent = submitCount;
+
+      var histD =
+        v.kind === "pass" ? "5/5 · 100 分" :
+        v.kind === "partial" ? "1/5 · 20 分" :
+        v.kind === "compile" ? "缺少分号" : "输出与期望不符";
+      HIST.push({ no: no, t: "刚刚", type: v.kind, d: histD });
+      renderHist();
+
+      var evD =
+        v.kind === "pass" ? "提交 #" + no + " · 5/5 用例通过" :
+        v.kind === "partial" ? "提交 #" + no + " · 1/5 用例通过" :
+        v.kind === "compile" ? "提交 #" + no + " · main.c:6: 缺少分号" :
+        "提交 #" + no + " · 输出与期望不符";
+      pushEvent(v.kind, evD);
+
+      body.innerHTML = verdictHTML(v);
+      jc.setAttribute("aria-busy", "false");
+
+      judging = false;
+      $submit.disabled = false;
+      $submit.textContent = "再次提交";
+
+      if (v.kind === "pass") {
+        SM.toast({
+          kicker: "Judge · 沙箱判题",
+          title: "通过 5/5 —— 你自己解出来了",
+          body: "L4 复盘已就绪：总结这次错在哪类问题，结论回流诊断画像。",
+          actions: [{ label: "进入复盘", href: "tutor.html", solid: true }],
+          duration: 12000,
+        });
+        stopDropWatch();
+      } else {
+        startDropWatch();
+      }
+    }
+  });
+
+  /* 初始渲染：#7 的既有结果 */
+  document.getElementById("judge-body").innerHTML = verdictHTML({
+    kind: "partial", pass: 1, total: 5, score: 20,
+    rows: CASES.map(function (c, i) {
+      var got = c.n === 0 ? 0 : (c.n * (c.n + 1)) / 2;
+      return { i: i + 1, n: c.n, exp: c.exp, got: got, ok: got === c.exp };
+    }),
+  });
+
+  /* ============ 放弃监测（F5 演示阈值 40s，线上 10 分钟） ============ */
+  var dropTimer = null;
+  function startDropWatch() {
+    if (dropFired) return;
+    stopDropWatch();
+    dropTimer = setTimeout(function () {
+      dropFired = true;
+      pushEvent("drop", "超时无活动 40 秒（演示阈值，线上 10 分钟）");
+      SM.toast({
+        kicker: "F5 · 诊断驱动的主动干预",
+        title: "导师主动出现：你已在「循环边界」卡点",
+        body: "连续同型错误触发。今日干预 1/3（同一学生同一题目每日 ≤ 3 次）。",
+        actions: [
+          { label: "进入对话", href: "tutor.html", solid: true },
+          { label: "继续自己想", href: "javascript:SM.toastClose()" },
+        ],
+        duration: 0,
+      });
+    }, 40000);
+  }
+  function stopDropWatch() {
+    if (dropTimer) clearTimeout(dropTimer);
+    dropTimer = null;
+  }
+  function activity() {
+    stopDropWatch();
+    if (!dropFired) startDropWatch(); /* 有活动即重置倒计时 */
+  }
+  document.addEventListener("click", function (e) {
+    if (e.target.closest("#submit-btn")) return;
+    activity();
+  });
+  startDropWatch();
+})();
+</script>
+</body>
+</html>

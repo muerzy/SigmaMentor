@@ -1,0 +1,31 @@
+{
+  "name": "sigmamentor",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "dev:api": "bun run --filter '@sigma/api' dev",
+    "dev:student": "bun run --filter '@sigma/student' dev",
+    "dev:teacher": "bun run --filter '@sigma/teacher' dev",
+    "db:generate": "bun run --filter '@sigma/db' generate",
+    "db:migrate": "bun run --filter '@sigma/db' migrate",
+    "db:seed": "bun run --filter '@sigma/db' seed",
+    "test": "bun test",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "bun-types": "^1.3.0",
+    "oxfmt": "0.63.0",
+    "oxlint": "1.78.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@sigma/student",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run css:watch & bun --hot server.ts",
+    "css:watch": "bunx @tailwindcss/cli -i src/styles/app.css -o src/styles/app.build.css --watch",
+    "css:build": "bunx @tailwindcss/cli -i src/styles/app.css -o src/styles/app.build.css --minify",
+    "start": "bun run css:build && bun server.ts"
+  },
+  "dependencies": {
+    "@elysiajs/eden": "1.4.9",
+    "@sigma/api": "workspace:*",
+    "@sigma/ui": "workspace:*",
+    "@tanstack/react-query": "5.101.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router": "7.9.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "tailwindcss": "4.3.3"
+  }
+}

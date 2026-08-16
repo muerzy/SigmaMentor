@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>班级学情看板 — SigmaMentor 教师端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-bottom:18px}
+  .dash-grid{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:16px;align-items:start}
+
+  .heat-wrap{position:relative}
+  .heat-tbl{display:grid;grid-template-columns:132px repeat(3,minmax(0,1fr));gap:3px}
+  .heat-head{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-faint);display:flex;align-items:center;justify-content:center;height:26px}
+  .heat-rowlab{font-size:12.5px;font-weight:500;display:flex;align-items:center;padding-right:8px;justify-content:flex-end;text-align:right;line-height:1.35}
+  .heat-tip{position:absolute;z-index:8;background:var(--ink);color:var(--paper);padding:9px 12px;font-size:12px;line-height:1.65;pointer-events:none;opacity:0;transition:opacity .12s;border-radius:2px;box-shadow:0 10px 30px rgba(10,10,11,.3);white-space:nowrap;transform:translate(-50%,-100%)}
+  .heat-tip b{font-family:var(--serif-zh)}
+  .heat-tip .mono{opacity:.75;font-size:10.5px;letter-spacing:.08em}
+  .heat-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+
+  .stu-row{display:grid;grid-template-columns:64px 1fr 92px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+  .stu-row:last-child{border-bottom:0}
+  .stu-row .n{font-size:13px;font-weight:500}
+  .stu-row .bar{height:7px;background:rgba(10,10,11,.08);border-radius:1px;overflow:hidden}
+  .stu-row .bar i{display:block;height:100%;background:var(--ink)}
+  .stu-row .m{font-family:var(--mono);font-size:11px;color:var(--fg-muted);text-align:right}
+
+  .rank{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .rank:last-child{border-bottom:0}
+  .rank .r-no{font-family:var(--serif-en);font-style:italic;font-size:22px;color:var(--fg-faint)}
+  .rank .r-t{font-family:var(--serif-zh);font-weight:600;font-size:14.5px}
+  .rank .r-d{font-family:var(--mono);font-size:11px;color:var(--fg-muted);margin-top:2px;letter-spacing:.04em}
+  .rank .delta{font-family:var(--mono);font-size:11px;white-space:nowrap}
+  .delta.up{color:var(--fail)}
+  .delta.down{color:var(--pass)}
+  .delta.flat{color:var(--fg-faint)}
+
+  .recon{font-size:12px;color:var(--fg-muted);line-height:1.7;border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
+
+  @media (max-width:1280px){.stats-row{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:659px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:759px){.dash-grid{grid-template-columns:1fr}.heat-tbl{grid-template-columns:96px repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body class="theme-gray">
+<div class="app">
+  <div id="nav-mount"></div>
+
+  <main class="main">
+    <div class="page-head" data-od-id="page-head">
+      <div>
+        <div class="kicker">F6 · 班级学情看板 / Class Analytics</div>
+        <h1 class="h-page">程序设计基础 · 计算机 2025-3 班</h1>
+        <div class="page-meta">
+          <span>52 名学生</span><span>数据源 analytics_snapshots</span>
+          <span>演示数据 · 模拟班级</span>
+        </div>
+      </div>
+      <div class="head-actions">
+        <a class="btn btn-ghost btn-sm" href="students.html" data-od-id="goto-risk">高危名单 →</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="tabs" id="week-tabs" data-od-id="week-tabs" style="margin-bottom:18px"></div>
+
+      <div class="stats-row" data-od-id="dash-stats"><!-- JS 渲染 --></div>
+
+      <div class="dash-grid">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <section class="card" data-od-id="heatmap-card">
+            <div class="card-h">
+              <span class="card-t">班级卡点热力图</span>
+              <span class="row" style="gap:6px" id="dim-toggle">
+                <button class="chip on" data-dim="n">卡点人数</button>
+                <button class="chip" data-dim="m">中位卡点时长</button>
+              </span>
+            </div>
+            <div class="card-b">
+              <div class="heat-wrap">
+                <div class="heat-tbl" id="heat" data-od-id="heatmap"></div>
+                <div class="heat-tip" id="heat-tip"></div>
+              </div>
+              <div class="heat-foot">
+                <div class="heat-legend">
+                  <span>卡点强度</span>
+                  <i style="background:rgba(10,10,11,.05)"></i><i style="background:rgba(10,10,11,.16)"></i><i style="background:rgba(10,10,11,.34)"></i><i style="background:rgba(10,10,11,.6)"></i><i style="background:rgba(10,10,11,.88)"></i>
+                  <span>少 → 多</span>
+                </div>
+                <span class="note">点击单元格查看该知识点学生明细</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card" id="detail-card" data-od-id="heat-detail" style="display:none">
+            <div class="card-h">
+              <span class="card-t" id="detail-t"></span>
+              <span class="card-k" id="detail-k"></span>
+            </div>
+            <div class="card-b" id="detail-b" style="padding-top:8px"></div>
+          </section>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <section class="card" data-od-id="top-card">
+            <div class="card-h">
+              <span class="card-t">TOP 卡点知识点</span><span class="card-k" id="top-k">本周</span>
+            </div>
+            <div class="card-b" style="padding-top:6px" id="top-list"></div>
+          </section>
+
+          <section class="card">
+            <div class="card-h"><span class="card-t">下一步</span><span class="card-k">Action</span></div>
+            <div class="card-b">
+              <div class="note" style="font-size:13px">
+                本周卡点前三已同步至针对性练习生成队列（F9 · P1 路线，教师确认后发布）。
+                循环边界连续两周居首，建议下次实验课头 10 分钟集中讲评。
+              </div>
+              <div class="recon">
+                看板数据与底表 SQL 直查一致（对账测试通过）· 50 人班级一学周数据加载 0.6s（验收线 &lt; 2s）。
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script src="../assets/data.js"></script>
+<script>
+SM.shell("teacher", "dashboard");
+(function () {
+  "use strict";
+  var D = window.SM_DATA;
+  var weekIdx = +(SM.store("sm-dash-week") || 3);
+  if (!D.weeks[weekIdx - 1]) weekIdx = 3;
+  var dim = "n";
+
+  /* ============ 周页签 ============ */
+  function renderTabs() {
+    var host = document.getElementById("week-tabs");
+    host.innerHTML = "";
+    D.weeks.forEach(function (w) {
+      var b = document.createElement("button");
+      b.className = "tab" + (w.idx === weekIdx ? " active" : "");
+      b.textContent = w.label;
+      b.addEventListener("click", function () {
+        weekIdx = w.idx;
+        SM.store("sm-dash-week", String(weekIdx));
+        renderTabs(); renderStats(); renderHeat(); renderTop();
+      });
+      host.appendChild(b);
+    });
+  }
+
+  /* ============ 统计 ============ */
+  function renderStats() {
+    var s = D.weeks[weekIdx - 1].stats;
+    document.getElementById("dash-stats").innerHTML =
+      '<div class="stat"><div class="stat-k">本周提交</div><div class="stat-n">' + s.submits + '</div><div class="stat-d">submission_events 聚合</div></div>' +
+      '<div class="stat"><div class="stat-k">卡点人次</div><div class="stat-n">' + s.stuck + '<span class="u">人次</span></div><div class="stat-d">一人可命中多个知识点</div></div>' +
+      '<div class="stat"><div class="stat-k">卡点中位时长</div><div class="stat-n">' + s.medMin + '<span class="u">分钟</span></div><div class="stat-d">从首次失败到通过/放弃</div></div>' +
+      '<div class="stat"><div class="stat-k">高危学生</div><div class="stat-n">' + s.risk + '<span class="u">人</span></div><div class="stat-d"><a class="link" href="students.html">查看名单与证据链 →</a></div></div>' +
+      '<div class="stat"><div class="stat-k">提交通过率</div><div class="stat-n">' + s.passRate + '<span class="u">%</span></div><div class="stat-d">通过提交 / 全部提交</div></div>';
+  }
+
+  /* ============ 热力图 ============ */
+  function bucket(v, max) {
+    if (!v) return "empty";
+    var t = dim === "n" ? v.n / max : v.m / max;
+    if (t <= 0.15) return "h0";
+    if (t <= 0.35) return "h1";
+    if (t <= 0.6) return "h2";
+    if (t <= 0.85) return "h3";
+    return "h4";
+  }
+  function renderHeat() {
+    /* 着色基准 = 全矩阵（三周 × 全知识点）在当前维度下的最大值 */
+    var max = 0;
+    D.kps.forEach(function (k) {
+      k.w.forEach(function (v) {
+        if (v) max = Math.max(max, dim === "n" ? v.n : v.m);
+      });
+    });
+    var html = '<div class="heat-head"></div>';
+    D.weeks.forEach(function (w) {
+      html += '<div class="heat-head">' + w.label.replace(" · 本周", "") + "</div>";
+    });
+    D.kps.forEach(function (k, i) {
+      html += '<div class="heat-rowlab">' + k.name + "</div>";
+      /* 每行渲染全部三周，高亮当前周？——热力图展示当前周数值、以周为列对比 */
+      D.weeks.forEach(function (w) {
+        var cell = k.w[w.idx - 1];
+        if (!cell) {
+          html += '<div class="heat-cell empty">—</div>';
+          return;
+        }
+        var val = dim === "n" ? cell.n : cell.m;
+        var cls = bucket(cell, max);
+        html +=
+          '<button class="heat-cell ' + cls + '" data-kp="' + k.name + '" data-w="' + w.idx + '"' +
+          ' aria-label="' + k.name + " 第" + w.idx + "周 · 卡点 " + cell.n + " 人 · 中位 " + cell.m + ' 分钟">' + val + "</button>";
+      });
+    });
+    document.getElementById("heat").innerHTML = html;
+    bindCells();
+  }
+
+  var tip = document.getElementById("heat-tip");
+  function bindCells() {
+    document.querySelectorAll(".heat-cell:not(.empty)").forEach(function (c) {
+      c.addEventListener("mouseenter", function () {
+        var kp = D.kps.filter(function (k) { return k.name === c.getAttribute("data-kp"); })[0];
+        var w = +c.getAttribute("data-w");
+        var cell = kp.w[w - 1];
+        tip.innerHTML =
+          "<b>" + kp.name + "</b> · " + D.weeks[w - 1].label.replace(" · 本周", "") + "<br>" +
+          '<span class="mono">卡点 ' + cell.n + " 人 · 中位 " + cell.m + " 分钟</span>";
+        var r = c.getBoundingClientRect();
+        var wrap = document.querySelector(".heat-wrap").getBoundingClientRect();
+        tip.style.left = r.left - wrap.left + r.width / 2 + "px";
+        tip.style.top = r.top - wrap.top - 6 + "px";
+        tip.style.opacity = "1";
+      });
+      c.addEventListener("mouseleave", function () { tip.style.opacity = "0"; });
+      c.addEventListener("focus", function () { c.dispatchEvent(new Event("mouseenter")); });
+      c.addEventListener("blur", function () { tip.style.opacity = "0"; });
+      c.addEventListener("click", function () { showDetail(c.getAttribute("data-kp"), +c.getAttribute("data-w")); });
+    });
+  }
+
+  /* ============ 单元格明细 ============ */
+  function showDetail(kpName, w) {
+    var kp = D.kps.filter(function (k) { return k.name === kpName; })[0];
+    var cell = kp.w[w - 1];
+    var card = document.getElementById("detail-card");
+    card.style.display = "";
+    document.getElementById("detail-t").textContent = kpName + " · " + D.weeks[w - 1].label.replace(" · 本周", "");
+    document.getElementById("detail-k").textContent = "卡点 " + cell.n + " 人 · 中位 " + cell.m + " 分钟";
+
+    var body = document.getElementById("detail-b");
+    if (w === 3 && D.stuckW3[kpName]) {
+      var list = D.stuckW3[kpName];
+      var maxM = 0;
+      list.forEach(function (s) { maxM = Math.max(maxM, s[1]); });
+      var more = cell.n - list.length;
+      body.innerHTML =
+        '<div class="note" style="margin-bottom:8px">按卡点时长降序 · 前 ' + list.length + " 位</div>" +
+        list.map(function (s) {
+          return (
+            '<div class="stu-row"><span class="n">' + s[0] + '</span>' +
+            '<span class="bar"><i style="width:' + Math.round((s[1] / maxM) * 100) + '%"></i></span>' +
+            '<span class="m">' + s[1] + ' 分 · ' + s[2] + "</span></div>"
+          );
+        }).join("") +
+        (more > 0 ? '<div class="note" style="margin-top:8px">…等共 ' + cell.n + " 人卡点该知识点</div>" : "");
+    } else {
+      body.innerHTML =
+        '<div class="note">本演示仅第 3 周提供学生级明细；第 1 / 2 周为聚合格（知识点 × 人数 × 时长）。' +
+        "当前格：" + cell.n + " 人卡点 · 中位 " + cell.m + " 分钟。</div>";
+    }
+  }
+
+  /* ============ 维度切换 ============ */
+  document.querySelectorAll("#dim-toggle .chip").forEach(function (b) {
+    b.addEventListener("click", function () {
+      dim = b.getAttribute("data-dim");
+      document.querySelectorAll("#dim-toggle .chip").forEach(function (x) {
+        x.classList.toggle("on", x === b);
+      });
+      renderHeat();
+    });
+  });
+
+  /* ============ TOP 卡点 ============ */
+  function renderTop() {
+    document.getElementById("top-k").textContent = D.weeks[weekIdx - 1].label;
+    var rows = D.kps.map(function (k) {
+      var cur = k.w[weekIdx - 1];
+      var prev = weekIdx > 1 ? k.w[weekIdx - 2] : null;
+      return { name: k.name, n: cur ? cur.n : 0, m: cur ? cur.m : 0, prev: prev ? prev.n : null };
+    }).sort(function (a, b) { return b.n - a.n; }).slice(0, 3);
+
+    document.getElementById("top-list").innerHTML = rows.map(function (r, i) {
+      var d;
+      if (r.prev === null) d = '<span class="delta flat">— 首周无对比</span>';
+      else {
+        var diff = r.n - r.prev;
+        d = diff > 0
+          ? '<span class="delta up">▲ +' + diff + " 人</span>"
+          : diff < 0
+            ? '<span class="delta down">▼ ' + diff + " 人</span>"
+            : '<span class="delta flat">= 持平</span>';
+      }
+      return (
+        '<div class="rank"><span class="r-no">0' + (i + 1) + "</span>" +
+        '<span><span class="r-t">' + r.name + '</span><div class="r-d">' + r.n + " 人卡点 · 中位 " + r.m + " 分钟</div></span>" +
+        d + "</div>"
+      );
+    }).join("");
+  }
+
+  renderTabs();
+  renderStats();
+  renderHeat();
+  renderTop();
+})();
+</script>
+</body>
+</html>

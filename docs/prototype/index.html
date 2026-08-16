@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SigmaMentor · 2σ 导师 — 产品原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0a0b; --ink-rgb:10,10,11;
+    --paper:#f1efea; --paper-rgb:241,239,234;
+    --paper-tint:#e8e5de;
+    --surface:#f8f6f2;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+    --accent:oklch(0.45 0.10 262);
+    --accent-tint:oklch(0.45 0.10 262 / .10);
+    --fg-muted:rgba(10,10,11,.62);
+    --fg-faint:rgba(10,10,11,.55);
+    --line:rgba(10,10,11,.16);
+    --line-mid:rgba(10,10,11,.3);
+    --line-strong:rgba(10,10,11,.55);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans-zh);font-size:14.5px;line-height:1.75;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+
+  /* ---- 顶部导航 ---- */
+  .topnav{position:sticky;top:0;z-index:20;background:rgba(var(--paper-rgb),.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topnav .row{display:flex;align-items:center;gap:28px;height:60px}
+  .brand{display:flex;align-items:baseline;gap:9px;margin-right:auto;white-space:nowrap}
+  .brand .sig{font-family:var(--serif-en);font-weight:800;font-size:19px;letter-spacing:-.02em}
+  .brand .sub{font-size:12px;font-weight:500;color:var(--fg-muted);letter-spacing:.06em}
+  .topnav nav{display:flex;gap:22px}
+  .topnav nav a{font-size:13.5px;color:var(--fg-muted);padding:4px 2px;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+  .topnav nav a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+  .prd-badge{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--line-mid);padding:5px 10px;border-radius:2px;color:var(--fg-muted);white-space:nowrap}
+
+  /* ---- Hero ---- */
+  .hero{padding:64px 0 48px;border-bottom:1px solid var(--line)}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--fg-muted);margin-bottom:18px}
+  .hero h1{font-family:var(--serif-zh);font-weight:700;font-size:clamp(30px,4vw,44px);line-height:1.3;letter-spacing:.005em;max-width:22em}
+  .hero .lead{font-family:var(--serif-zh);font-size:clamp(15px,1.4vw,17.5px);line-height:1.8;color:var(--fg-muted);max-width:44em;margin-top:18px}
+  .hero .meta-row{display:flex;gap:1.1em;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-faint);margin-top:20px}
+  .cta-row{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 22px;border-radius:3px;font-size:14px;font-weight:500;border:1px solid var(--ink);transition:all .15s}
+  .btn-primary{background:var(--ink);color:var(--paper)}
+  .btn-primary:hover{background:oklch(0.22 0.005 270)}
+  .btn-ghost{color:var(--ink);border-color:var(--line-mid)}
+  .btn-ghost:hover{background:rgba(10,10,11,.06);border-color:var(--ink)}
+
+  /* ---- 分区标题 ---- */
+  .sec{padding:52px 0 8px}
+  .sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+  .sec-t{font-family:var(--serif-zh);font-weight:700;font-size:24px}
+  .sec-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--fg-faint)}
+
+  /* ---- 屏幕卡片 ---- */
+  .screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+  .scard{display:flex;flex-direction:column;gap:9px;background:var(--surface);border:1px solid var(--line);border-top:2px solid var(--ink);border-radius:3px;padding:20px 20px 16px;transition:border-color .18s,transform .18s}
+  .scard:hover{border-top-color:var(--accent)}
+  .scard .s-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .scard .f-tag{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--accent);background:var(--accent-tint);padding:3px 8px;border-radius:2px}
+  .scard .side{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-faint)}
+  .scard h3{font-family:var(--serif-zh);font-weight:700;font-size:18px;line-height:1.4}
+  .scard p{font-size:13.5px;color:var(--fg-muted);line-height:1.7;flex:1}
+  .scard .s-go{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ink);border-top:1px dashed var(--line);padding-top:12px;margin-top:4px;display:flex;justify-content:space-between;transition:color .15s}
+  .scard:hover .s-go{color:var(--accent)}
+
+  /* ---- 数据闭环 ---- */
+  .loop{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:44px}
+  .lstep{border-top:1px solid var(--line-mid);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+  .lstep .no{font-family:var(--serif-en);font-style:italic;font-size:15px;color:var(--fg-faint)}
+  .lstep b{font-size:14.5px;font-weight:600}
+  .lstep span{font-size:12.5px;color:var(--fg-muted);line-height:1.6}
+
+  /* ---- 红线 ---- */
+  .banner{border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:20px 24px;display:flex;align-items:center;justify-content:center;gap:16px;font-family:var(--serif-zh);font-weight:700;font-size:clamp(14px,1.5vw,17px);letter-spacing:.02em;text-align:center;flex-wrap:wrap;margin:40px 0 0}
+  .banner .tag{flex-shrink:0;display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;padding:5px 12px;border:1px solid currentColor;opacity:.9;font-weight:400}
+
+  /* 锚点跳转不被 sticky 顶栏遮挡 */
+  #screens,#loop,#redlines{scroll-margin-top:76px}
+
+  /* ---- 页脚 ---- */
+  footer{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 34px}
+  footer .row{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-faint)}
+
+  @media (max-width:760px){
+    .topnav nav{display:none}
+    .hero{padding:44px 0 36px}
+    .wrap{padding:0 20px}
+  }
+</style>
+</head>
+<body>
+
+<header class="topnav" data-od-id="top-nav">
+  <div class="wrap row">
+    <a class="brand" href="index.html" data-od-id="brand-home">
+      <span class="sig">SigmaMentor</span><span class="sub">2σ 导师</span>
+    </a>
+    <nav aria-label="主导航">
+      <a href="#screens">原型屏幕</a>
+      <a href="#loop">数据闭环</a>
+      <a href="#redlines">产品红线</a>
+    </nav>
+    <span class="prd-badge">PRD v1.0 · P0</span>
+  </div>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="hero wrap" data-od-id="home-hero">
+    <div class="kicker">产品原型 · 过程数据驱动的学情诊断与干预闭环</div>
+    <h1>为高校编程课配的一对一 AI 导师<br>与学情诊断系统</h1>
+    <p class="lead">把学生「卡住的那一刻」变成可见、可诊断、可干预的过程数据闭环——学生卡点时有人引导自己解出来，教师一屏看清全班卡在哪。</p>
+    <div class="meta-row">
+      <span>复赛 Demo 基线 · F1–F7</span><span>·</span>
+      <span>学生端 3 屏</span><span>·</span>
+      <span>教师端 2 屏</span><span>·</span>
+      <span>演示数据为模拟班级</span>
+    </div>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="student/assignment.html" data-od-id="cta-student">进入学生端 · 从作业开始</a>
+      <a class="btn btn-ghost" href="teacher/dashboard.html" data-od-id="cta-teacher">教师端 · 班级看板</a>
+    </div>
+  </section>
+
+  <!-- 原型屏幕 -->
+  <section class="sec wrap" id="screens" data-od-id="home-screens">
+    <div class="sec-h">
+      <h2 class="sec-t">原型屏幕</h2>
+      <span class="sec-k">Prototype Screens · 5</span>
+    </div>
+    <div class="screens">
+      <a class="scard" href="student/assignment.html" data-od-id="card-f1">
+        <span class="s-top"><span class="f-tag">F1 · P0</span><span class="side">学生端</span></span>
+        <h3>作业提交与沙箱判题</h3>
+        <p>在线编辑 → 沙箱执行用例 → 即时结果，全过程事件写入 submission_events。</p>
+        <span class="s-go"><span>assignment.html</span><span>进入 →</span></span>
+      </a>
+      <a class="scard" href="student/diagnosis.html" data-od-id="card-f2">
+        <span class="s-top"><span class="f-tag">F2 · P0</span><span class="side">学生端</span></span>
+        <h3>卡点诊断反馈</h3>
+        <p>卡点知识点 · 错误演化路径 · 知识缺陷画像，每条结论可回溯至提交证据。</p>
+        <span class="s-go"><span>diagnosis.html</span><span>进入 →</span></span>
+      </a>
+      <a class="scard" href="student/tutor.html" data-od-id="card-f3">
+        <span class="s-top"><span class="f-tag">F3 · P0</span><span class="side">学生端</span></span>
+        <h3>四级苏格拉底辅导</h3>
+        <p>L1 定向提示 → L2 策略提示 → L3 同类样例 → L4 复盘回流，永不直接给答案。</p>
+        <span class="s-go"><span>tutor.html</span><span>进入 →</span></span>
+      </a>
+      <a class="scard" href="teacher/dashboard.html" data-od-id="card-f6">
+        <span class="s-top"><span class="f-tag">F6 · P0</span><span class="side">教师端</span></span>
+        <h3>班级学情看板</h3>
+        <p>知识点 × 人数 × 卡点时长热力图，3 秒看清这个班本周卡在哪。</p>
+        <span class="s-go"><span>dashboard.html</span><span>进入 →</span></span>
+      </a>
+      <a class="scard" href="teacher/students.html" data-od-id="card-f7">
+        <span class="s-top"><span class="f-tag">F7 · P0</span><span class="side">教师端</span></span>
+        <h3>高危名单</h3>
+        <p>连续卡点 / 多次放弃 / 轨迹异常规则召回，每个名字后跟可展开证据链。</p>
+        <span class="s-go"><span>students.html</span><span>进入 →</span></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 数据闭环 -->
+  <section class="sec wrap" id="loop" data-od-id="home-loop">
+    <div class="sec-h">
+      <h2 class="sec-t">过程数据闭环</h2>
+      <span class="sec-k">Data Loop</span>
+    </div>
+    <div class="loop">
+      <div class="lstep"><span class="no">01</span><b>提交</b><span>学生在浏览器编辑器完成作业</span></div>
+      <div class="lstep"><span class="no">02</span><b>沙箱判题</b><span>容器隔离执行测试用例</span></div>
+      <div class="lstep"><span class="no">03</span><b>过程事件</b><span>submission_events 只追加记录</span></div>
+      <div class="lstep"><span class="no">04</span><b>诊断</b><span>规则引擎定位卡点知识点</span></div>
+      <div class="lstep"><span class="no">05</span><b>分级引导</b><span>L1–L4 苏格拉底对话</span></div>
+      <div class="lstep"><span class="no">06</span><b>看板与干预</b><span>教师一屏决策，回流再诊断</span></div>
+    </div>
+  </section>
+
+  <!-- 红线 -->
+  <div class="wrap">
+    <div class="banner" id="redlines" data-od-id="home-redlines">
+      <span class="tag">产品红线</span>
+      <span>永不直接给答案 · 绝不自动定罪 · 数据不出校 · 每条诊断可回溯</span>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap row">
+    <span>SigmaMentor · GOAI 2026 · 无界应用赛道 AI + 教育</span>
+    <span>演示数据为模拟班级 · PRD v1.0 / 2026-08-15</span>
+  </div>
+</footer>
+
+</body>
+</html>

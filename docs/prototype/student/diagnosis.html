@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的诊断画像 — SigmaMentor 学生端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:18px}
+  .diag-grid{display:grid;grid-template-columns:7fr 5fr;gap:16px;align-items:start}
+
+  .evd{margin-top:8px}
+
+  .concl{font-family:var(--serif-zh);font-size:15px;line-height:1.85;padding:16px 18px;border-left:3px solid var(--ink);background:rgba(10,10,11,.045)}
+  .concl b{font-weight:700}
+  .concl .cite{display:block;margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-muted);line-height:1.8}
+
+  .rel-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .rel-item:last-child{border-bottom:0}
+  .rel-item .r-no{font-family:var(--serif-en);font-style:italic;font-size:15px;color:var(--fg-faint)}
+  .rel-item .r-t{font-size:13px}
+  .rel-item .r-t b{font-weight:600}
+  .rel-item .r-d{font-family:var(--mono);font-size:10.5px;color:var(--fg-muted);margin-top:1px}
+
+  .ev-l{display:inline-block;margin-left:6px}
+  .ev-l a{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--accent)}
+  .drawer .codebox{margin:10px 0}
+  .d-evt{display:grid;grid-template-columns:24px 70px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px}
+  .d-evt:last-child{border-bottom:0}
+  .d-evt .s{font-family:var(--serif-en);font-style:italic;color:var(--fg-faint);text-align:right}
+
+  @media (max-width:959px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:719px){.diag-grid{grid-template-columns:1fr}}
+
+  /* 墨黑主题：本页字面量颜色补丁 */
+  .theme-dark .concl{background:rgba(241,239,234,.06)}
+</style>
+</head>
+<body class="theme-dark">
+<div class="app">
+  <div id="nav-mount"></div>
+
+  <main class="main">
+    <div class="page-head" data-od-id="page-head">
+      <div>
+        <div class="kicker">F2 · 卡点诊断反馈 / Diagnosis</div>
+        <h1 class="h-page">我的诊断画像</h1>
+        <div class="page-meta">
+          <span>李明 · 2025100317</span><span>规则引擎 + LLM 增强</span>
+          <span>诊断延迟 0.4s</span><span>更新于 8.15 14:44</span>
+        </div>
+      </div>
+      <div class="head-actions">
+        <a class="btn btn-ghost btn-sm" href="assignment.html">返回作业</a>
+        <a class="btn btn-ghost btn-sm" href="tutor.html" data-od-id="goto-tutor">进入导师对话</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- 概览统计 -->
+      <div class="stats-row" data-od-id="diag-stats">
+        <div class="stat">
+          <div class="stat-k">当前卡点知识点</div>
+          <div class="stat-n zh">循环边界条件</div>
+          <div class="stat-d">自 8.12 第 3 次提交起持续未解</div>
+        </div>
+        <div class="stat">
+          <div class="stat-k">本周卡点时长</div>
+          <div class="stat-n">41<span class="u">分钟</span></div>
+          <div class="stat-d">今日 14:44 至今 · 累计 96 分钟</div>
+        </div>
+        <div class="stat">
+          <div class="stat-k">同型错误复发</div>
+          <div class="stat-n">3<span class="u">次</span></div>
+          <div class="stat-d">均为「循环上界多加一个 n」</div>
+        </div>
+        <div class="stat">
+          <div class="stat-k">关联提交证据</div>
+          <div class="stat-n">4<span class="u">条</span></div>
+          <div class="stat-d">全部可点击回溯（红线 ⑤）</div>
+        </div>
+      </div>
+
+      <div class="diag-grid">
+        <!-- 左：演化路径 + 知识缺陷 -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <section class="card" data-od-id="evolution-card">
+            <div class="card-h">
+              <span class="card-t">错误演化路径</span>
+              <span class="card-k">Error Evolution</span>
+            </div>
+            <div class="card-b">
+              <div class="tl" id="evo"></div>
+            </div>
+          </section>
+
+          <section class="card" data-od-id="deficit-card">
+            <div class="card-h">
+              <span class="card-t">知识点缺陷</span>
+              <span class="card-k">置信度 · 规则引擎</span>
+            </div>
+            <div class="card-b" style="padding-top:10px">
+              <div class="meter hot">
+                <span class="m-k">循环边界</span>
+                <span class="m-bar"><i data-w="72"></i></span>
+                <span class="m-v">0.72</span>
+              </div>
+              <div class="meter">
+                <span class="m-k">累加器初值</span>
+                <span class="m-bar"><i data-w="31"></i></span>
+                <span class="m-v">0.31</span>
+              </div>
+              <div class="meter">
+                <span class="m-k">输出格式</span>
+                <span class="m-bar"><i data-w="18"></i></span>
+                <span class="m-v">0.18</span>
+              </div>
+              <div class="note note-b">数值由轨迹统计 + 错误聚类得出（diagnosis.ts 规则版）；≥ 0.60 标红并触发导师干预。</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- 右：结论 + 关联 -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <section class="card" data-od-id="conclusion-card">
+            <div class="card-h">
+              <span class="card-t">诊断结论</span>
+              <span class="card-k">D-0815-07</span>
+            </div>
+            <div class="card-b">
+              <div class="concl">
+                该生自 8.12 第 3 次提交起，<b>循环边界类错误持续复现 3 次</b>，累计卡点 96 分钟；今日 14:44 部分通过（1/5），失败用例全部为 n ≥ 1——<b>每次都多加了一个 n</b>，编译与初始化问题已自行修复，缺陷收敛于循环上界取值。
+                建议：接受 <b>L1 定向提示</b>自主修正；解出后进入 L4 复盘回流画像。
+                <span class="cite">证据 #3 · #6 · #7 · 当前会话 ｜ 维果茨基 ZPD：反馈发生在卡住的那一刻</span>
+              </div>
+              <div style="margin-top:14px">
+                <a class="btn btn-ghost btn-sm" href="tutor.html">接受 L1 提示 · 进对话</a>
+              </div>
+            </div>
+          </section>
+
+          <section class="card" data-od-id="related-card">
+            <div class="card-h">
+              <span class="card-t">关联提交证据</span>
+              <span class="card-k">Evidence Chain</span>
+            </div>
+            <div class="card-b" style="padding-top:6px">
+              <div class="rel-item">
+                <span class="r-no">#3</span>
+                <span class="r-t"><b>运行错误</b> · 循环边界<span class="r-d">8.12 21:44 · 0/5 用例</span></span>
+                <button class="btn btn-ghost btn-sm" data-evd="3">证据</button>
+              </div>
+              <div class="rel-item">
+                <span class="r-no">#6</span>
+                <span class="r-t"><b>运行错误</b> · 初始化残留<span class="r-d">今日 14:20 · 0/5 用例（已自修复）</span></span>
+                <button class="btn btn-ghost btn-sm" data-evd="6">证据</button>
+              </div>
+              <div class="rel-item">
+                <span class="r-no">#7</span>
+                <span class="r-t"><b>部分通过</b> · 循环边界<span class="r-d">今日 14:44 · 1/5 用例</span></span>
+                <button class="btn btn-ghost btn-sm" data-evd="7">证据</button>
+              </div>
+              <div class="note note-b">每条诊断结论均引用具体提交记录与轨迹证据，非黑箱打分（产品红线 ⑤）。</div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+SM.shell("student", "diagnosis");
+(function () {
+  "use strict";
+
+  /* ============ 提交证据（抽屉内容源） ============ */
+  var SUBS = {
+    3: {
+      t: "提交 #3 · 8.12 21:44",
+      verdict: '<span class="badge b-fail">运行错误</span> <span class="note">0/5 用例 · 输出随机值</span>',
+      code:
+        'int n, sum;\nscanf("%d", &n);\nfor (int i = 1; i <= n; i++)\n    sum += i;\nprintf("%d", sum);',
+      evts: [
+        [9, "compile", "提交 #2 · 缺少分号"],
+        [10, "edit", "重写循环段"],
+        [11, "run", "提交 #3 · 0/5 · 输出随机值"],
+      ],
+      concl: "sum 未初始化 + 上界取 i ≤ n。首次定性为「循环边界」类错误。",
+    },
+    6: {
+      t: "提交 #6 · 今日 14:20",
+      verdict: '<span class="badge b-fail">运行错误</span> <span class="note">0/5 用例 · 全部偏移 1</span>',
+      code:
+        'int n, sum = -1;\nscanf("%d", &n);\nfor (int i = 1; i <= n; i++)\n    sum += i;\nprintf("%d\\n", sum);',
+      evts: [
+        [13, "compile", "提交 #5 · 变量未声明"],
+        [14, "edit", "声明变量 · 遗留调试初值 -1"],
+        [15, "run", "提交 #6 · 0/5 · 全部偏移 1"],
+      ],
+      concl: "初始化残留 −1（下一次提交已自修复），边界错误仍在。",
+    },
+    7: {
+      t: "提交 #7 · 今日 14:44",
+      verdict: '<span class="badge b-warn">部分通过</span> <span class="note">1/5 用例 · 20 分</span>',
+      code:
+        'int n, sum = 0;\nscanf("%d", &n);\nfor (int i = 1; i <= n; i++)\n    sum += i;\nprintf("%d\\n", sum);',
+      evts: [
+        [15, "run", "提交 #6 · 0/5 · 全部偏移 1"],
+        [16, "edit", "修正 sum 初值为 0"],
+        [17, "partial", "提交 #7 · 1/5 · n=0 通过"],
+      ],
+      concl: "仅 n=0 通过；n ≥ 1 全部多加一个 n——缺陷收敛于循环上界。",
+    },
+  };
+
+  document.querySelectorAll("[data-evd]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var s = SUBS[b.getAttribute("data-evd")];
+      if (!s) return;
+      SM.drawer(
+        s.t,
+        '<div style="margin-bottom:10px">' + s.verdict + "</div>" +
+        '<div class="codebox">' + s.code.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</div>" +
+        '<div class="kicker" style="margin:16px 0 6px">该次提交前后事件</div>' +
+        s.evts.map(function (e) {
+          return '<div class="d-evt"><span class="s">' + e[0] + "</span>" + SM.evtBadge(e[1]) +
+            '<span style="font-size:12px;color:var(--fg-muted)">' + e[2] + "</span></div>";
+        }).join("") +
+        '<div class="note note-b">' + s.concl + "</div>"
+      );
+    });
+  });
+
+  /* ============ 错误演化路径 ============ */
+  var EVO = [
+    { cls: "e-compile", time: "8.12 20:41", title: "编译错误 ×2",d: "6 分钟内两次同位语法错误（缺少分号）", evd: null },
+    { cls: "e-run", time: "8.12 21:44", title: "运行错误",d: "0/5 用例 · sum 未初始化；边界取 i ≤ n 首次暴露", evd: 3 },
+    { cls: "e-drop", time: "8.12 23:40", title: "放弃",d: "超时无活动 22 分钟 · 此后 2 天未再提交", evd: null },
+    { cls: "e-compile", time: "8.15 14:02", title: "编译错误",d: "变量未声明（换设备后重写导致）", evd: null },
+    { cls: "e-run", time: "8.15 14:20", title: "运行错误",d: "0/5 · 初始化残留 −1，全部偏移 1", evd: 6 },
+    { cls: "e-partial", time: "8.15 14:44", title: "部分通过 1/5",d: "自修复初始化；n ≥ 1 仍多加一个 n", evd: 7 },
+    { cls: "e-run", time: "当前", title: "卡点持续 · 41 分钟",d: "同型错误未解 · 已触发导师主动干预（今日 1/3）", evd: null, live: true },
+  ];
+
+  document.getElementById("evo").innerHTML = EVO.map(function (e) {
+    var link = e.evd
+      ? ' <span class="ev-l">[<a href="javascript:void 0" data-evd="' + e.evd + '">查看证据 #' + e.evd + "</a>]</span>"
+      : "";
+    var liveTag = e.live ? ' <a class="link" href="tutor.html" style="margin-left:6px">去对话 →</a>' : "";
+    return (
+      '<div class="tl-item ' + e.cls + '">' +
+      '<span class="tl-time">' + e.time + "</span>" +
+      '<div class="tl-body"><div class="tl-t">' + e.title + link + liveTag + "</div>" +
+      '<div class="tl-d">' + e.d + "</div></div></div>"
+    );
+  }).join("");
+
+  /* 演化路径里的证据链接（动态生成后绑定） */
+  document.querySelectorAll("#evo [data-evd]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      document.querySelector('.rel-item [data-evd="' + a.getAttribute("data-evd") + '"]').click();
+    });
+  });
+
+  /* ============ 缺陷条动画 ============ */
+  requestAnimationFrame(function () {
+    setTimeout(function () {
+      document.querySelectorAll(".m-bar i").forEach(function (i) {
+        i.style.transition = "width .8s cubic-bezier(.77,0,.175,1)";
+        i.style.width = i.getAttribute("data-w") + "%";
+      });
+    }, 120);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+/* 教师端样式入口：Tailwind4 + Ink Classic（中性灰 theme-gray）+ 本端页面级
+ * ⚠️ 任意显式 @source 会关闭 Tailwind 的自动扫描——必须把本 app 源码与共享 ui
+ * 目录都显式列出，否则任意值工具类（p-[18px] 等）静默丢失（实测踩坑）。 */
+@import "tailwindcss";
+@source "../";
+@source "../../../../packages/ui/src";
+@import "../../../../packages/ui/src/styles/base.css";
+
+/* ---- 看板（dashboard · F6）---- */
+.stats-row-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  gap: 16px;
+  align-items: start;
+}
+.heat-wrap {
+  position: relative;
+}
+.heat-tbl {
+  display: grid;
+  grid-template-columns: 132px repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+.heat-head {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+}
+.heat-rowlab {
+  font-size: 12.5px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  padding-right: 8px;
+  justify-content: flex-end;
+  text-align: right;
+  line-height: 1.35;
+}
+.heat-tip {
+  position: absolute;
+  z-index: 8;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 9px 12px;
+  font-size: 12px;
+  line-height: 1.65;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+  border-radius: 2px;
+  box-shadow: 0 10px 30px rgba(10, 10, 11, 0.3);
+  white-space: nowrap;
+  transform: translate(-50%, -100%);
+}
+.heat-tip b {
+  font-family: var(--serif-zh);
+}
+.heat-tip .mono {
+  opacity: 0.75;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+}
+.heat-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.stu-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 92px;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.stu-row:last-child {
+  border-bottom: 0;
+}
+.stu-row .n {
+  font-size: 13px;
+  font-weight: 500;
+}
+.stu-row .bar {
+  height: 7px;
+  background: rgba(10, 10, 11, 0.08);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.stu-row .bar i {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+.stu-row .m {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-muted);
+  text-align: right;
+}
+.rank {
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.rank:last-child {
+  border-bottom: 0;
+}
+.rank .r-no {
+  font-family: var(--serif-en);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--fg-faint);
+}
+.rank .r-t {
+  font-family: var(--serif-zh);
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.rank .r-d {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
+.rank .delta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.delta.up {
+  color: var(--fail);
+}
+.delta.down {
+  color: var(--pass);
+}
+.delta.flat {
+  color: var(--fg-faint);
+}
+.recon {
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.7;
+  border-top: 1px dashed var(--line);
+  margin-top: 12px;
+  padding-top: 10px;
+}
+@media (max-width: 1280px) {
+  .stats-row-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 659px) {
+  .stats-row-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 759px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+  .heat-tbl {
+    grid-template-columns: 96px repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---- 高危名单（students · F7）---- */
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.risk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.risk-item {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.risk-item.open {
+  border-color: var(--line-strong);
+}
+.risk-item.followed {
+  opacity: 0.72;
+}
+.risk-head {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1.1fr) minmax(0, 2fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 18px;
+  cursor: pointer;
+}
+.risk-head:hover {
+  background: rgba(10, 10, 11, 0.03);
+}
+.risk-head .r-no {
+  font-family: var(--serif-en);
+  font-style: italic;
+  font-size: 21px;
+  color: var(--fg-faint);
+}
+.risk-head .r-who b {
+  font-size: 15px;
+  font-weight: 600;
+  display: block;
+}
+.risk-head .r-who span {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--fg-muted);
+  letter-spacing: 0.06em;
+}
+.risk-head .r-sum {
+  font-size: 12.5px;
+  color: var(--fg-muted);
+  line-height: 1.6;
+}
+.risk-head .r-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.risk-head .chev {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-faint);
+  transition: transform 0.2s;
+  white-space: nowrap;
+}
+.risk-item.open .chev {
+  transform: rotate(180deg);
+}
+.risk-body {
+  border-top: 1px solid var(--line);
+  padding: 18px;
+  display: none;
+}
+.risk-item.open .risk-body {
+  display: block;
+}
+.ev-grid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 20px;
+}
+.ev-k {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-bottom: 10px;
+}
+.same-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.same-chips .sc {
+  font-size: 12.5px;
+  color: var(--fg-muted);
+  border-left: 2px solid var(--line-mid);
+  padding-left: 10px;
+  line-height: 1.6;
+}
+.ev-detail {
+  font-size: 12.5px;
+  color: var(--fg-muted);
+  line-height: 1.75;
+  border-top: 1px dashed var(--line);
+  margin-top: 14px;
+  padding-top: 12px;
+}
+.advice {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.follow-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+.follow-chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+.risk-banner {
+  margin-top: 18px;
+}
+.tsep {
+  font-family: var(--font-mono);
+  opacity: 0.35;
+  align-self: center;
+}
+@media (max-width: 759px) {
+  .risk-head {
+    grid-template-columns: 36px 1fr auto;
+  }
+  .risk-head .r-sum {
+    grid-column: 2 / -1;
+  }
+  .risk-head .r-badges {
+    grid-column: 2 / -1;
+    justify-content: flex-start;
+  }
+  .ev-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 登录注册（复用学生端结构） */
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.auth-card {
+  width: min(440px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 40px 42px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0 18px 50px rgba(10, 10, 11, 0.1);
+}
+.auth-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.auth-brand .sig {
+  font-family: var(--serif-en);
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+.auth-brand .sub {
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+.auth-error {
+  border: 1px solid var(--fail);
+  color: var(--fail);
+  font-size: 12.5px;
+  padding: 8px 12px;
+  border-radius: 2px;
+  line-height: 1.6;
+}
+
+/* 字段组：label 与输入留呼吸感 */
+.auth-card .field {
+  gap: 9px;
+}
+.auth-card .field input {
+  height: 42px;
+  padding: 0 14px;
+}

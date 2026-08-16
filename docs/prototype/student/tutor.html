@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导师对话 · L1–L4 分级引导 — SigmaMentor 学生端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  .tutor-grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}
+  .stack{display:flex;flex-direction:column;gap:16px}
+
+  .ctx-kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px}
+  .ctx-kv .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-faint);padding-top:3px}
+  .ctx-kv .v{line-height:1.65}
+
+  .lv-desc{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  .lv-desc .li{display:grid;grid-template-columns:26px 1fr;gap:8px;font-size:12.5px;color:var(--fg-muted);line-height:1.6}
+  .lv-desc .li b{font-family:var(--mono);font-size:11px;color:var(--fg-faint);font-weight:500;padding-top:2px}
+  .lv-desc .li.on{color:var(--ink)}
+  .lv-desc .li.on b{color:var(--ink);font-weight:600}
+
+  .redline{border:1px solid var(--line-mid);padding:12px 14px;font-size:12.5px;line-height:1.7;color:var(--fg-muted)}
+  .redline b{color:var(--ink)}
+
+  .chat-card{display:flex;flex-direction:column;height:calc(100vh - 232px);min-height:520px}
+  .chat-interv{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--line);background:rgba(10,10,11,.03);font-size:12.5px;color:var(--fg-muted)}
+  .chat-interv .pulse{width:8px;height:8px;border-radius:50%;background:var(--fail);flex-shrink:0;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  .chat-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .chat-h .who{display:flex;align-items:baseline;gap:10px}
+  .chat-h .who .n{font-family:var(--serif-zh);font-weight:700;font-size:16.5px}
+  .chat-h .who .m{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-faint)}
+
+  .sample{border:1px solid var(--line-mid);margin-top:10px;background:var(--paper)}
+  .sample .s-h{padding:8px 12px;border-bottom:1px dashed var(--line);font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-muted)}
+  .sample .s-b{padding:12px}
+  .sample .s-q{font-size:13px;line-height:1.7;margin-bottom:10px}
+  .sample .s-note{font-size:12px;color:var(--fg-muted);line-height:1.65;margin-top:10px;border-top:1px dashed var(--line);padding-top:9px}
+
+  @media (max-width:719px){
+    .tutor-grid{grid-template-columns:1fr}
+    .chat-card{height:calc(100vh - 120px);min-height:460px}
+  }
+
+  /* 墨黑主题：本页字面量颜色补丁 */
+  .theme-dark .chat-interv{background:rgba(241,239,234,.05)}
+  .theme-dark .typing i{background:rgba(241,239,234,.6)}
+</style>
+</head>
+<body class="theme-dark">
+<div class="app">
+  <div id="nav-mount"></div>
+
+  <main class="main">
+    <div class="page-head" data-od-id="page-head">
+      <div>
+        <div class="kicker">F3 · 四级苏格拉底辅导 / Scaffolding Dialogue</div>
+        <h1 class="h-page">导师对话</h1>
+        <div class="page-meta">
+          <span>会话 GS-0093 · guidance_sessions</span>
+          <span>上下文：P-03 循环求和 + 诊断 D-0815-07</span>
+        </div>
+      </div>
+      <div class="head-actions">
+        <a class="btn btn-ghost btn-sm" href="assignment.html">返回作业</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="tutor-grid">
+
+        <!-- 左：上下文 -->
+        <div class="stack">
+          <section class="card" data-od-id="ctx-problem">
+            <div class="card-h"><span class="card-t">当前题目</span><span class="card-k">P-03</span></div>
+            <div class="card-b">
+              <div class="ctx-kv">
+                <span class="k">题目</span><span class="v">循环求和 —— 输出 1 到 n−1 的整数之和</span>
+                <span class="k">状态</span><span class="v"><span class="badge b-warn">部分通过 1/5</span></span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card" data-od-id="ctx-stuck">
+            <div class="card-h"><span class="card-t">我的卡点</span><span class="card-k">From D-0815-07</span></div>
+            <div class="card-b">
+              <div class="ctx-kv">
+                <span class="k">知识点</span><span class="v">循环边界（置信度 0.72）</span>
+                <span class="k">卡点</span><span class="v">41 分钟 · 今日</span>
+                <span class="k">复发</span><span class="v">同型错误 3 次</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card" data-od-id="ctx-strategy">
+            <div class="card-h"><span class="card-t">会话策略</span><span class="card-k">A2 · 导师 Agent</span></div>
+            <div class="card-b">
+              <div class="levels" id="levels" data-od-id="level-meter">
+                <div class="lv" data-l="1"><b>L1</b>定向提示</div>
+                <div class="lv" data-l="2"><b>L2</b>策略提示</div>
+                <div class="lv" data-l="3"><b>L3</b>同类样例</div>
+                <div class="lv" data-l="4"><b>L4</b>复盘提炼</div>
+              </div>
+              <div class="lv-desc" id="lv-desc">
+                <div class="li" data-l="1"><b>L1</b><span>定向提示 —— 指出检查方向，不给改法</span></div>
+                <div class="li" data-l="2"><b>L2</b><span>策略提示 —— 对比样例，暴露差异</span></div>
+                <div class="li" data-l="3"><b>L3</b><span>同类样例 —— 结构相同、数据不同的解法</span></div>
+                <div class="li" data-l="4"><b>L4</b><span>复盘提炼 —— 解出后总结，回流画像</span></div>
+              </div>
+            </div>
+          </section>
+
+          <div class="redline" data-od-id="redline-note">
+            <b>产品红线 ①</b> — 导师 Agent 在 L1–L4 任何一级都<b>不产出完整可提交代码</b>。
+            依据：Generation Effect（Slamecka &amp; Graf 1982）——自己生成的答案记忆更牢。
+          </div>
+        </div>
+
+        <!-- 右：对话 -->
+        <section class="card chat-card" data-od-id="chat-card">
+          <div class="chat-h">
+            <span class="who"><span class="n">导师 · 2σ</span><span class="m">Socratic Mode · LLM 本地推理</span></span>
+            <span class="card-k" id="chat-state">当前 L1</span>
+          </div>
+          <div class="chat-interv" data-od-id="intervention-banner">
+            <span class="pulse"></span>
+            <span>导师主动出现 —— 检测到你在「循环边界」卡点 41 分钟（连续同型错误触发）· 今日干预 1/3</span>
+          </div>
+          <div class="chat-wrap">
+            <div class="chat-log" id="log" data-od-id="chat-log" aria-live="polite"></div>
+            <div class="quick" id="quick" data-od-id="quick-replies"></div>
+            <div class="chat-input">
+              <textarea id="say" placeholder="输入你的回答，或点击下方快捷回复…" aria-label="对话输入"></textarea>
+              <button class="btn btn-primary" id="send" data-od-id="send-button">发送</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+SM.shell("student", "tutor");
+(function () {
+  "use strict";
+
+  /* ============ 状态 ============ */
+  var state = {
+    level: 1,        /* 当前策略等级 1–4 */
+    solved: false,   /* 是否已通过 */
+    finished: false, /* L4 复盘完成 */
+    refusalCount: 0,
+    generic: 0,
+  };
+
+  var L_TAG = {
+    1: "L1 · 定向提示",
+    2: "L2 · 策略提示",
+    3: "L3 · 同类样例",
+    4: "L4 · 复盘提炼",
+  };
+
+  /* ============ 消息文案 ============ */
+  var SCRIPT = {
+    l1_open:
+      "先别急着改代码。回答我一个问题：当 n = 5 时，你的循环 <code class='inline'>for (int i = 1; i <= n; i++)</code> 一共执行几次？每次把几加进了 sum？",
+    l1_meta: "依据：维果茨基最近发展区 · 反馈发生在卡住的那一刻",
+    l2:
+      "好，再具体一层。对比两条边界写法：<code class='inline'>i &lt; n</code> 与 <code class='inline'>i &lt;= n</code>。取 n = 5，把 i 依次取到的值一行行列出来——两条循环分别加了哪些数？哪一条会多加一个 5？你的题目要求加到 n−1，该用哪条？",
+    l2_meta: "依据：对比样例 · 暴露边界差异",
+    l3:
+      "我们换一道结构相同、数据不同的题，你照着它的结构看自己的：",
+    l3_sample_q: "读入 m（0 ≤ m ≤ 100），输出 1 到 m−2（含）的所有整数之和。",
+    l3_sample_code:
+      "int m, s = 0;\nscanf(\"%d\", &m);\nfor (int i = 1; i <= m - 2; i++)   /* 上界 m−2 本身要包含 → 用 <= */\n    s += i;\nprintf(\"%d\\n\", s);",
+    l3_note:
+      "样例的边界「包含 m−2」所以用 ≤。回到你的题目：n−1 应该被加进去吗？——包含用 ≤，不包含用 &lt;。对照着改一个字符就够了。",
+    l3_meta: "依据：worked example fading · 样例渐隐",
+    refusal:
+      "这条红线我不能破——直接给你可提交的完整代码，下次同类题你还是会卡在同一个地方（Generation Effect：自己生成的答案才记得牢，Slamecka &amp; Graf 1982）。但我可以把提示再往下拆一层。",
+    refuse_again:
+      "还是不行——任何一级都不给完整代码，这是产品设计而不是模型能力问题。试试回答我上面的问题，或者点「再提示一下」往下降一层难度。",
+    l4_ask:
+      "恭喜，5/5 是你自己改出来的。最后一问：用自己的话说说——这次错在哪一类问题上？",
+    l4_meta: "依据：Generation Effect · 生成式复盘",
+    solved_early:
+      "很好，先确认一下：是在作业页用沙箱判题拿到 5/5 了吗？如果是，我们直接进入最后一环节。",
+  };
+
+  var GENERIC = {
+    1: [
+      "先把 n = 5 时循环每次加的值一个个写出来，看看最后多出来的是哪个数？",
+      "你觉得问题出在循环体里面，还是循环的起止条件上？为什么？",
+    ],
+    2: [
+      "把 i &lt; n 和 i &lt;= n 两条循环各自加的数列出来，它们的差正好是哪一项？",
+      "题目要求「1 到 n−1」——n−1 这个数在不在你的循环里？n 呢？",
+    ],
+    3: [
+      "回到上面 m−2 的样例：它的上界为什么用 ≤？你的题目里 n−1 是「包含」还是「不包含」？",
+      "对照样例把你的循环边界写出来——和样例差在哪一个字符？",
+    ],
+  };
+
+  /* ============ 渲染 ============ */
+  var $log = document.getElementById("log");
+  var $quick = document.getElementById("quick");
+  var $say = document.getElementById("say");
+
+  function esc(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  }
+  function scrollLog() {
+    $log.scrollTop = $log.scrollHeight;
+  }
+  function addUser(text) {
+    var d = document.createElement("div");
+    d.className = "msg msg-user";
+    d.innerHTML = esc(text) + "<div class='m-meta'>李明 · 刚刚</div>";
+    $log.appendChild(d);
+    scrollLog();
+  }
+  function addBot(html, meta, lv) {
+    var d = document.createElement("div");
+    d.className = "msg msg-bot";
+    d.innerHTML =
+      html +
+      "<div class='m-meta'><span class='lv-tag'>" + (L_TAG[lv] || "") + "</span>" +
+      (meta ? "<span>" + meta + "</span>" : "") + "</div>";
+    $log.appendChild(d);
+    scrollLog();
+    return d;
+  }
+  function botReply(html, meta, lv, cb) {
+    var t = document.createElement("div");
+    t.className = "msg msg-bot";
+    t.innerHTML = "<span class='typing'><i></i><i></i><i></i></span>";
+    $log.appendChild(t);
+    scrollLog();
+    setTimeout(function () {
+      t.remove();
+      addBot(html, meta, lv);
+      if (cb) cb();
+    }, 700 + Math.random() * 400);
+  }
+
+  function renderLevels() {
+    document.querySelectorAll("#levels .lv").forEach(function (el) {
+      var l = +el.getAttribute("data-l");
+      el.classList.toggle("on", l === state.level && !state.finished);
+      el.classList.toggle("done", l < state.level || (state.finished && l === 4));
+    });
+    document.querySelectorAll("#lv-desc .li").forEach(function (el) {
+      el.classList.toggle("on", +el.getAttribute("data-l") === state.level);
+    });
+    document.getElementById("chat-state").textContent = state.finished
+      ? "已回流画像"
+      : state.solved
+        ? "L4 · 复盘中"
+        : "当前 L" + state.level;
+  }
+
+  function renderQuick() {
+    if (state.finished) {
+      $quick.innerHTML =
+        "<a class='chip' href='diagnosis.html'>查看更新后的诊断画像 →</a>" +
+        "<a class='chip' href='assignment.html'>返回作业</a>";
+      return;
+    }
+    if (state.solved) {
+      $quick.innerHTML = "";
+      [["循环边界"], ["累加器初值"], ["输出格式"]].forEach(function (p) {
+        var b = document.createElement("button");
+        b.className = "chip";
+        b.textContent = p[0];
+        b.addEventListener("click", function () { finishL4(p[0]); });
+        $quick.appendChild(b);
+      });
+      return;
+    }
+    var items = [
+      { t: "还是没思路，再提示一下", act: "up" },
+      { t: "直接给我代码", act: "refuse" },
+      { t: "我改好了，5/5 通过了", act: "solve" },
+    ];
+    $quick.innerHTML = "";
+    items.forEach(function (it) {
+      var b = document.createElement("button");
+      b.className = "chip";
+      b.textContent = it.t;
+      b.addEventListener("click", function () { handle(it.act, it.t); });
+      $quick.appendChild(b);
+    });
+  }
+
+  /* ============ 策略逻辑（不跳级、不降级） ============ */
+  function handle(act, text) {
+    if (state.finished) return;
+    addUser(text);
+
+    if (act === "refuse") {
+      state.refusalCount += 1;
+      botReply(
+        state.refusalCount > 1 ? SCRIPT.refuse_again : SCRIPT.refusal,
+        "产品红线 ① · 永不给答案",
+        state.level
+      );
+      return;
+    }
+    if (act === "solve") {
+      state.solved = true;
+      state.level = 4;
+      renderLevels();
+      botReply(SCRIPT.l4_ask, SCRIPT.l4_meta, 4, renderQuick);
+      return;
+    }
+    if (act === "up") {
+      if (state.level < 3) {
+        state.level += 1;
+        renderLevels();
+        if (state.level === 2) botReply(SCRIPT.l2, SCRIPT.l2_meta, 2);
+        if (state.level === 3) {
+          botReply(SCRIPT.l3, SCRIPT.l3_meta, 3, function () {
+            var d = document.createElement("div");
+            d.className = "msg msg-bot";
+            d.innerHTML =
+              "<div class='sample'>" +
+              "<div class='s-h'>L3 · 同类样例（结构相同 · 数据不同）</div>" +
+              "<div class='s-b'><div class='s-q'>" + SCRIPT.l3_sample_q + "</div>" +
+              "<div class='codebox'>" + SCRIPT.l3_sample_code.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</div>" +
+              "<div class='s-note'>" + SCRIPT.l3_note + "</div></div></div>";
+            $log.appendChild(d);
+            scrollLog();
+          });
+        }
+      } else {
+        botReply(GENERIC[3][state.generic++ % GENERIC[3].length], SCRIPT.l3_meta, 3);
+      }
+      return;
+    }
+    /* 自由文本：落到当前等级的引导问题池 */
+    var pool = GENERIC[Math.min(state.level, 3)];
+    botReply(pool[state.generic++ % pool.length], null, state.level);
+  }
+
+  function finishL4(answer) {
+    addUser(answer);
+    state.finished = true;
+    renderLevels();
+    botReply(
+      "已记录：「" + answer + "」。这条复盘结论已回流你的诊断画像——下次同型错误出现前，提示会更早到来。" +
+      "本次会话写入 <code class='inline'>guidance_sessions</code>，画像更新见 <code class='inline'>diagnoses</code>。",
+      "闭环：诊断 → 干预 → 再诊断验证",
+      4,
+      renderQuick
+    );
+  }
+
+  /* ============ 输入 ============ */
+  document.getElementById("send").addEventListener("click", send);
+  $say.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  });
+  function send() {
+    var t = $say.value.trim();
+    if (!t) return;
+    $say.value = "";
+    /* 意图分类后统一走 handle（由它负责 addUser，避免重复气泡） */
+    if (/(代码|答案|直接给|帮我写)/i.test(t)) { handle("refuse", t); return; }
+    if (/(改好|通过|对了|过了|5\s*\/\s*5|ac)/i.test(t)) { handle("solve", t); return; }
+    handle("free", t);
+  }
+
+  /* ============ 初始消息 ============ */
+  addBot(SCRIPT.l1_open, SCRIPT.l1_meta, 1);
+  renderLevels();
+  renderQuick();
+})();
+</script>
+</body>
+</html>

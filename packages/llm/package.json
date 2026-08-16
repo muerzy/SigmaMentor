@@ -1,0 +1,13 @@
+{
+  "name": "@sigma/llm",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./adapters/pi-ai": "./src/adapters/pi-ai.ts"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "0.84.2"
+  }
+}

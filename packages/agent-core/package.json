@@ -1,0 +1,13 @@
+{
+  "name": "@sigma/agent-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@sigma/db": "workspace:*",
+    "@sigma/llm": "workspace:*"
+  }
+}

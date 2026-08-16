@@ -1,0 +1,24 @@
+{
+  "name": "@sigma/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./client.ts",
+    "./schema": "./schema.ts",
+    "./migrate": "./migrate.ts"
+  },
+  "scripts": {
+    "generate": "bunx drizzle-kit generate",
+    "migrate": "bun run migrate.ts",
+    "seed": "bun run seed.ts"
+  },
+  "dependencies": {
+    "@sigma/agent-core": "workspace:*",
+    "bcryptjs": "3.0.3",
+    "drizzle-orm": "0.45.2"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.10"
+  }
+}
